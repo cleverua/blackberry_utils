@@ -1,0 +1,9 @@
+== DESCRIPTION
+
+This is a bunch of useful utils for Java BlackBerry development.
+
+== EXAMPLES
+
+Examples are not present.
+Though the source code contains UtilsTestingApplication it is not a demo/sample application.
+The application was created just to test the utils during development.
