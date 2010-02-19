@@ -30,13 +30,11 @@ public class MathUtils {
      * @return the closest integer to the argument.
      */
     public static int round(float x) {
-        // check for NaN
-        if (x != x) {
-            return 0;
-        }
-        return (int) Math.floor(x + 0.5d);
+        // Check for NaN first.
+        // (x != x) does the same as Float.isNaN(x), but a bit more effective.
+        return (x != x) ? 0 : (int) Math.floor(x + 0.5d);
     }
-
+    
     /**
      * <p>In RIM API 4.5 there is no such a helpful method.</p>
      * <p><b>IMPORTANT:</b> for API 4.6.0+ use <b>net.rim.device.api.util.MathUtilities</b> class instead.</p>
@@ -61,10 +59,8 @@ public class MathUtils {
      * @return the closest integer to the argument.
      */
     public static long round(double x) {
-        // check for NaN
-        if (x != x) {
-            return 0L;
-        }
-        return (long) Math.floor(x + 0.5d);
+        // Check for NaN first.
+        // (x != x) does the same as Double.isNaN(x), but a bit more effective.
+        return (x != x) ? 0L : (long) Math.floor(x + 0.5d);
     }
 }
