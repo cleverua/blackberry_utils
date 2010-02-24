@@ -4,15 +4,28 @@ This is a bunch of useful utils for Java BlackBerry development.
 
 === StringUtils
 
+Provides convenient String manipulation methods:
+* boolean isBlank(String str)
+* boolean isNotBlank(String str)
+* String safe(String str)
+* String safe(String str, String defaultValue)
+* int linesCount(String str)
+* String removeBefore(String str, String substrToDelete)
+* String replaceAll(String source, String pattern, String replacement)
+
 === MathUtils
 
-The class provides convenient math rounding methods the RIM API 4.5 does not provide.
+Provides convenient math rounding methods the RIM API 4.5 does not provide:
+* int round(float x)
+* long round(double x)
 
 <b>IMPORTANT:</b> for API 4.6.0+ use <tt>net.rim.device.api.util.MathUtilities</tt> class instead.
 
 === FontUtils
 
-Allows to set/get the default font for the application.
+Provides convenient methods to set/get the default font for the application:
+* void setApplicationDefaultFont()
+* Font getApplicationDefaultFont()
 
 == EXAMPLES
 
