@@ -10,6 +10,10 @@ The class provides convenient math rounding methods the RIM API 4.5 does not pro
 
 <b>IMPORTANT:</b> for API 4.6.0+ use <tt>net.rim.device.api.util.MathUtilities</tt> class instead.
 
+=== FontUtils
+
+Allows to set/get the default font for the application.
+
 == EXAMPLES
 
 Examples are not present.
