@@ -1,4 +1,4 @@
-package com.cleverua.bb.example;
+package com.cleverua.bb.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -85,36 +85,9 @@ public class Logger {
         } catch (IOException e) {
             System.out.println("Failed to write to log file, " + e);
         } finally {
-            safelyCloseStream(writer);
-            safelyCloseStream(out);
-            safelyCloseStream(fc);
-        }
-    }
-
-    private static void safelyCloseStream(OutputStream stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-                stream = null;
-            } catch (Exception e) { /* that's ok */ }
-        }
-    }
-
-    private static void safelyCloseStream(FileConnection stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-                stream = null;
-            } catch (Exception e) { /* that's ok */ }
-        }
-    }
-
-    private static void safelyCloseStream(OutputStreamWriter stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-                stream = null;
-            } catch (Exception e) { /* that's ok */ }
+            IOUtils.safelyCloseStream(writer);
+            IOUtils.safelyCloseStream(out);
+            IOUtils.safelyCloseStream(fc);
         }
     }
 }

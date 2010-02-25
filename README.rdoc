@@ -27,6 +27,22 @@ Provides convenient methods to set/get the default font for the application:
 * void setApplicationDefaultFont()
 * Font getApplicationDefaultFont()
 
+=== IOUtils
+
+Provides convenient methods for file IO manipulations:
+* void safelyCloseStream(InputStream stream)
+* void safelyCloseStream(OutputStream stream)
+* void safelyCloseStream(FileConnection stream)
+* void safelyCloseStream(OutputStreamWriter stream)
+
+=== Logger
+
+A simple file logging facility.
+* void debug(Object o, String msg)
+* void debug(String msg)
+
+See details on Logger usage here: http://github.com/cleverua/blackberry_logger
+
 == EXAMPLES
 
 Examples are not present.

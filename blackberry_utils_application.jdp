@@ -22,10 +22,11 @@ AutoRestart=0
 Description=A bunch of useful utils.
 ExcludeFromBuildAll=0
 [Files
-src\com\cleverua\bb\example\Logger.java
 src\com\cleverua\bb\example\PlaceholderScreen.java
 src\com\cleverua\bb\example\UtilsTestingApplication.java
 src\com\cleverua\bb\utils\FontUtils.java
+src\com\cleverua\bb\utils\IOUtils.java
+src\com\cleverua\bb\utils\Logger.java
 src\com\cleverua\bb\utils\MathUtils.java
 src\com\cleverua\bb\utils\StringUtils.java
 ]

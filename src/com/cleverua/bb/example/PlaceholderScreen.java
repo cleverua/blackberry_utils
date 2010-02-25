@@ -1,5 +1,7 @@
 package com.cleverua.bb.example;
 
+import com.cleverua.bb.utils.Logger;
+
 import net.rim.device.api.ui.Field;
 import net.rim.device.api.ui.FieldChangeListener;
 import net.rim.device.api.ui.component.ButtonField;
