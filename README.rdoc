@@ -12,6 +12,8 @@ Provides convenient String manipulation methods:
 * int linesCount(String str)
 * String removeBefore(String str, String substrToDelete)
 * String replaceAll(String source, String pattern, String replacement)
+* String join(String delimiter, Object[] tokens)
+* String join(String delimiter, Enumeration tokens)
 
 === MathUtils
 

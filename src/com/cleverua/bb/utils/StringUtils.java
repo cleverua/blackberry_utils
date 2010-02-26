@@ -1,5 +1,7 @@
 package com.cleverua.bb.utils;
 
+import java.util.Enumeration;
+
 import net.rim.device.api.util.Comparator;
 import net.rim.device.api.util.StringComparator;
 
@@ -68,6 +70,53 @@ public class StringUtils {
         return str.substring(index + substrToDelete.length());
     }
 
+    /**
+     * Returns a string containing the tokens joined by delimiters.
+     * 
+     * @param tokens an {@link Enumeration} of objects to be joined. 
+     * Strings will be formed from the objects by calling <code>object.toString()</code>.
+     * 
+     * @see {@link java.util.Hashtable#elements() Hashtable.elements()}, 
+     * {@link java.util.Hashtable#keys() Hashtable.keys()}, 
+     * {@link java.util.Vector#elements() Vector.elements()}
+     */
+    public static String join(String delimiter, Enumeration tokens) {
+        StringBuffer sb = new StringBuffer();
+        boolean firstTime = true;
+        while (tokens.hasMoreElements()) {
+            Object token = tokens.nextElement();
+            if (firstTime) {
+                firstTime = false;
+            } else {
+                sb.append(delimiter);
+            }
+            sb.append(token);
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Returns a string containing the tokens joined by delimiters.
+     * 
+     * @param tokens an Array of objects to be joined. 
+     * Strings will be formed from the objects by calling <code>object.toString()</code>.
+     */
+    public static String join(String delimiter, Object[] tokens) {
+        StringBuffer sb = new StringBuffer();
+        boolean firstTime = true;
+        final int len = tokens.length;
+        for (int i = 0; i < len; i++) {
+            Object token = tokens[i];
+            if (firstTime) {
+                firstTime = false;
+            } else {
+                sb.append(delimiter);
+            }
+            sb.append(token);
+        }
+        return sb.toString();
+    }
+    
     private static class StrComparator implements Comparator {
 
         private static final StringComparator STRING_COMPARATOR = StringComparator.getInstance(true);
