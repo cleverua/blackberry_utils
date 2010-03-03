@@ -1,9 +1,11 @@
 package com.cleverua.bb.utils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
 
@@ -114,4 +116,66 @@ public class IOUtils {
             }
         }
     }
+    
+    /**
+     * Deletes the file or directory specified in the <code>url</code> parameter.
+     * If the target does not exist, then the method does nothing.
+     * 
+     * @param url - URL to a file or a directory to be deleted, 
+     * e.g. <code>"file:///SDCard/file.txt"</code>.
+     * 
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if the target is a directory and it is not empty, 
+     * the target is unaccessible, or an unspecified error occurs 
+     * preventing deletion of the target.</li>
+     * </ul>
+     */
+    public static void delete(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url);
+            if (fc.exists()) {
+                fc.delete();
+            }
+        } finally {
+            safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Renames the selected file or directory to a new name in the same directory.
+     * If the target does not exist, then the method does nothing.
+     * 
+     * @param url - URL to the file or directory to be renamed, 
+     * e.g. <code>"file:///SDCard/file.txt"</code>.
+     * 
+     * @param newName - The new name of the file or directory. 
+     * The name must not contain any path specification; 
+     * the file or directory remains in its same directory as before this method call.
+     * 
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if the connection's target for the <code>url</code> is not accessible, 
+     * a file or directory already exists by the <code>newName</code>, 
+     * or <code>newName</code> is an invalid filename for the platform 
+     * (e.g. contains characters invalid in a filename on the platform)</li>
+     * </ul>
+     * @throws NullPointerException if <code>newName</code> is null.
+     * @throws IllegalArgumentException if <code>newName</code> contains any path specification.
+     */
+    public static void rename(String url, String newName) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url);
+            if (fc.exists()) {
+                fc.rename(newName);
+            }
+        } finally {
+            safelyCloseStream(fc);
+        }
+    }
+    
 }

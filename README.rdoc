@@ -39,6 +39,8 @@ Provides convenient methods for file IO manipulations:
 * void safelyCloseStream(OutputStream stream)
 * void safelyCloseStream(FileConnection stream)
 * void safelyCloseStream(OutputStreamWriter stream)
+* void delete(String url) throws IOException
+* void rename(String url, String newName) throws IOException
 
 === Logger
 
