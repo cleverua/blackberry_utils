@@ -8,12 +8,13 @@ import java.io.OutputStreamWriter;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
-
 /**
  * A bunch of convenient methods for file IO manipulations.
  * @author Vit Khudenko, vit@cleverua.com
  */
 public class IOUtils {
+    
+    private static final String TMP_EXT = ".tmp";
     
     /**
      * Safely closes {@link InputStream} stream.
@@ -178,4 +179,80 @@ public class IOUtils {
         }
     }
     
+    /**
+     * Copies a file. If the destination file has been already present, then it is overwritten.
+     * 
+     * @param sourceFileUrl - url of the source file.
+     * @param destinationFileUrl - url of the destination file.
+     * @throws IOException
+     */
+    public static void copyFile(String sourceFileUrl, String destinationFileUrl) throws IOException {
+        InputStream is  = null;
+        OutputStream os = null;
+        FileConnection source         = null;
+        FileConnection destination    = null;
+        FileConnection destinationTmp = null;
+        
+        try {
+            
+            source = (FileConnection) Connector.open(sourceFileUrl, Connector.READ);
+            destination = (FileConnection) Connector.open(destinationFileUrl, Connector.READ_WRITE);
+            
+            if (destination.exists()) {
+                // truncate does not work if file is encrypted via SDCard encryption (has ".rem" suffix)!
+                // destination.truncate(0);
+                
+                String destinationFileName = destination.getName();
+                String destinationTmpFileName = destinationFileUrl + TMP_EXT;
+                
+                destinationTmp = (FileConnection) Connector.open(destinationTmpFileName, Connector.READ_WRITE);
+                
+                if (destinationTmp.exists()) {
+                    destinationTmp.delete(); /* just in case */
+                }
+                destinationTmp.create();
+                
+                try {
+                    is = source.openInputStream();
+                    os = destinationTmp.openOutputStream();
+                    copyData(is, os);
+                } catch (IOException e) {
+                    try {
+                        destinationTmp.delete();
+                    } catch (IOException e1) { 
+                        /* do nothing here */
+                    }
+                    throw e;
+                } finally {
+                    safelyCloseStream(is);
+                    safelyCloseStream(os);
+                }
+                
+                destination.delete();
+                destinationTmp.rename(destinationFileName);
+                
+            } else {
+                destination.create();
+                is = source.openInputStream();
+                os = destination.openOutputStream();
+                copyData(is, os);
+            }
+            
+        } finally {
+             safelyCloseStream(is);
+             safelyCloseStream(os);
+             safelyCloseStream(source);
+             safelyCloseStream(destination);
+             safelyCloseStream(destinationTmp);
+        }
+    }
+    
+    private static void copyData(InputStream source, OutputStream destination) throws IOException {
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = source.read(buf)) > 0) {
+            destination.write(buf, 0, len);
+        }
+        destination.flush();
+    }
 }
