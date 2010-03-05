@@ -8,6 +8,8 @@ import java.io.OutputStreamWriter;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
+import net.rim.device.api.io.file.FileIOException;
+
 /**
  * A bunch of convenient methods for file IO manipulations.
  * @author Vit Khudenko, vit@cleverua.com
@@ -244,6 +246,80 @@ public class IOUtils {
              safelyCloseStream(source);
              safelyCloseStream(destination);
              safelyCloseStream(destinationTmp);
+        }
+    }
+    
+    /**
+     * Saves byte array data to file with a given url.
+     * 
+     * @param data - Array of bytes to save.
+     * @param url - url of the source file.
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if the target file system is not accessible or the data array size is greater 
+     * than free memory that is available on the file system the file resides on.</li>
+     * <li>if an I/O error occurs.</li>
+     * <li>if url has a trailing "/" to denote a directory, or an unspecified error occurs preventing creation of the file.</li>
+     * </ul>
+     */
+    public static void saveDataToFile(String url, byte[] data) throws IOException {
+        FileConnection fc = null;
+        OutputStream out = null;
+        
+        try {
+            fc = (FileConnection) Connector.open(url);
+            
+            // check for available space
+            if (fc.availableSize() < data.length) {
+                throw new FileIOException(FileIOException.FILESYSTEM_FULL);
+            }
+            
+            if (fc.exists()) {
+                // TODO: don't delete original unless save is successful (save to temp first, then rename?)
+                fc.delete(); 
+            }
+            fc.close();
+
+            fc = (FileConnection) Connector.open(url);
+            fc.create();
+
+            out = fc.openOutputStream();
+            out.write(data);
+            out.flush();
+
+        } finally {
+             safelyCloseStream(out);
+             safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Reads file data and returns it as a byte array. 
+     * File should be present, otherwise IOException is thrown. 
+     * 
+     * @param url - url of the source file.
+     * @return Array of bytes.
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if an I/O error occurs, if the method is invoked on a directory, 
+     * the file does not yet exist, or the connection's target is not accessible.</li>
+     * </ul>
+     */
+    public static byte[] getFileData(String url) throws IOException {
+        FileConnection fc = null;
+        InputStream in = null;
+        
+        try {
+            fc = (FileConnection) Connector.open(url);
+            in = fc.openInputStream();
+            byte[] data = new byte[(int) fc.fileSize()];
+            in.read(data);
+            return data;
+        } finally {
+            safelyCloseStream(in);
+            safelyCloseStream(fc);
         }
     }
     
