@@ -198,16 +198,13 @@ public class IOUtils {
         try {
             
             source = (FileConnection) Connector.open(sourceFileUrl, Connector.READ);
-            destination = (FileConnection) Connector.open(destinationFileUrl, Connector.READ_WRITE);
+            destination = (FileConnection) Connector.open(destinationFileUrl);
             
             if (destination.exists()) {
                 // truncate does not work if file is encrypted via SDCard encryption (has ".rem" suffix)!
                 // destination.truncate(0);
                 
-                String destinationFileName = destination.getName();
-                String destinationTmpFileName = destinationFileUrl + TMP_EXT;
-                
-                destinationTmp = (FileConnection) Connector.open(destinationTmpFileName, Connector.READ_WRITE);
+                destinationTmp = (FileConnection) Connector.open(destinationFileUrl + TMP_EXT);
                 
                 if (destinationTmp.exists()) {
                     destinationTmp.delete(); /* just in case */
@@ -219,17 +216,16 @@ public class IOUtils {
                     os = destinationTmp.openOutputStream();
                     copyData(is, os);
                 } catch (IOException e) {
+                    safelyCloseStream(os);
                     try {
                         destinationTmp.delete();
                     } catch (IOException e1) { 
                         /* do nothing here */
                     }
                     throw e;
-                } finally {
-                    safelyCloseStream(is);
-                    safelyCloseStream(os);
                 }
                 
+                String destinationFileName = destination.getName();
                 destination.delete();
                 destinationTmp.rename(destinationFileName);
                 
@@ -251,9 +247,10 @@ public class IOUtils {
     
     /**
      * Saves byte array data to file with a given url.
+     * If the destination file has been already present, then it is overwritten.
      * 
      * @param data - Array of bytes to save.
-     * @param url - url of the source file.
+     * @param url - url of the destination file.
      * @throws IOException
      * <ul>
      * <li>if the <code>url</code> is invalid.</li>
@@ -264,8 +261,9 @@ public class IOUtils {
      * </ul>
      */
     public static void saveDataToFile(String url, byte[] data) throws IOException {
-        FileConnection fc = null;
-        OutputStream out = null;
+        FileConnection fc  = null;
+        FileConnection tmp = null;
+        OutputStream out   = null;
         
         try {
             fc = (FileConnection) Connector.open(url);
@@ -276,21 +274,43 @@ public class IOUtils {
             }
             
             if (fc.exists()) {
-                // TODO: don't delete original unless save is successful (save to temp first, then rename?)
-                fc.delete(); 
+
+                tmp = (FileConnection) Connector.open(url + TMP_EXT);
+                
+                if (tmp.exists()) {
+                    tmp.delete(); /* just in case */
+                }
+                tmp.create();
+                
+                try {
+                    out = tmp.openOutputStream();
+                    out.write(data);
+                    out.flush();
+                } catch (IOException e) {
+                    safelyCloseStream(out);
+                    try {
+                        tmp.delete();
+                    } catch (IOException e1) { 
+                        /* do nothing here */
+                    }
+                    throw e;
+                }
+                
+                String originalFileName = fc.getName();
+                fc.delete();
+                tmp.rename(originalFileName);
+                
+            } else {
+                fc.create();
+                out = fc.openOutputStream();
+                out.write(data);
+                out.flush();
             }
-            fc.close();
-
-            fc = (FileConnection) Connector.open(url);
-            fc.create();
-
-            out = fc.openOutputStream();
-            out.write(data);
-            out.flush();
 
         } finally {
              safelyCloseStream(out);
              safelyCloseStream(fc);
+             safelyCloseStream(tmp);
         }
     }
     
