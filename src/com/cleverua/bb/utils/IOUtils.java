@@ -9,6 +9,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
 import net.rim.device.api.io.file.FileIOException;
+import net.rim.device.api.system.Characters;
 
 /**
  * A bunch of convenient methods for file IO manipulations.
@@ -17,6 +18,7 @@ import net.rim.device.api.io.file.FileIOException;
 public class IOUtils {
     
     private static final String TMP_EXT = ".tmp";
+    private static final String URL_ROOT_SEPARATOR = ":///";
     
     /**
      * Safely closes {@link InputStream} stream.
@@ -340,6 +342,65 @@ public class IOUtils {
         } finally {
             safelyCloseStream(in);
             safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Creates a directory corresponding to passed <code>url</code> parameter. 
+     * Directories in the specified <code>url</code> are not recursively created and 
+     * must be explicitly created before subdirectories can be created. If the directory
+     * is already exists, then the method does nothing. 
+     * 
+     * @param url - path to dir to create, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
+     * @throws IOException
+     * <ul> 
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if invoked on a non-existent file, the target file system is not accessible, 
+     * or an unspecified error occurs preventing creation of the directory.</li>
+     * </ul>
+     */
+    public static void createDir(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url);
+            if (!fc.exists()) {
+                fc.mkdir();
+            }
+        } finally {
+            safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Creates a directory corresponding to passed <code>url</code> parameter. 
+     * Unlike {@link #createDir createDir(String url)} directories in the 
+     * specified <code>url</code> are recursively created if needed. If the directory
+     * is already exists, then the method does nothing. 
+     * 
+     * @param url - path to dir to create, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
+     * @throws IllegalArgumentException if <code>url</code> does not 
+     * include <code>":///"</code> substring.
+     * @throws IOException
+     * <ul> 
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if invoked on a non-existent file, the target file system is not accessible, 
+     * or an unspecified error occurs preventing creation of the directory.</li>
+     * </ul>
+     */
+    public static void createDirIncludingAncestors(String url) throws IOException {
+        final int index = url.indexOf(URL_ROOT_SEPARATOR);
+        if (index == -1) {
+            throw new IllegalArgumentException("Invalid url");
+        }
+        String rootOfPath = url.substring(0, index + 4); // e.g. "file:///"
+        String restOfPath = url.substring(rootOfPath.length());
+        int solidusIndex = -1;
+        while (true) {
+            solidusIndex = restOfPath.indexOf(Characters.SOLIDUS, solidusIndex + 1);
+            if (solidusIndex < 0) {
+                break;
+            }
+            createDir(rootOfPath + restOfPath.substring(0, solidusIndex + 1));
         }
     }
     

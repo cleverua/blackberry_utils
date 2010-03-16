@@ -44,6 +44,8 @@ Provides convenient methods for file IO manipulations:
 * void copyFile(String sourceFileUrl, String destinationFileUrl) throws IOException
 * void saveDataToFile(String url, byte[] data) throws IOException
 * byte[] getFileData(String url) throws IOException
+* void createDir(String url) throws IOException
+* void createDirIncludingAncestors(String url) throws IOException
 
 === Logger
 
