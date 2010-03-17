@@ -46,6 +46,9 @@ Provides convenient methods for file IO manipulations:
 * byte[] getFileData(String url) throws IOException
 * void createDir(String url) throws IOException
 * void createDirIncludingAncestors(String url) throws IOException
+* boolean isDirectory(String url) throws IOException
+* void deleteDir(String url) throws IOException
+* String removeEncExtension(String url)
 
 === Logger
 

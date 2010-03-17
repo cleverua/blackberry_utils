@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Enumeration;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
@@ -16,6 +17,12 @@ import net.rim.device.api.system.Characters;
  * @author Vit Khudenko, vit@cleverua.com
  */
 public class IOUtils {
+
+    /**
+     * Any file gets this ".rem" extension if SDCard Encryption is ON.
+     * A media file gets the ".rem" extension if MediaFile Encryption is ON.
+     */
+    private static final String ENCR_FILE_EXTENSION = ".rem";
     
     private static final String TMP_EXT = ".tmp";
     private static final String URL_ROOT_SEPARATOR = ":///";
@@ -402,6 +409,77 @@ public class IOUtils {
             }
             createDir(rootOfPath + restOfPath.substring(0, solidusIndex + 1));
         }
+    }
+    
+    /**
+     * @param url - target path to check, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
+     * @return True if the target exists, is accessible, and is a directory, otherwise false.
+     * @throws IOException if the <code>url</code> is invalid.
+     */
+    public static boolean isDirectory(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return fc.isDirectory();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Deletes the file or directory specified in the <code>url</code> parameter.
+     * If the target does not exist, then the method does nothing.
+     * 
+     * <p>
+     * The method was specifically designed to delete a directory 
+     * assuming it may not be empty.
+     * </p>
+     * 
+     * <p>The method also works if the directory contains encrypted files.</p>
+     * 
+     * @param url - URL to a file or a directory to be deleted, 
+     * e.g. <code>"file:///SDCard/my_dir/"</code>.
+     * 
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>the target is unaccessible, or an unspecified error occurs 
+     * preventing deletion of the target.</li>
+     * </ul>
+     */
+    public static void deleteDir(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            if (isDirectory(url)) {
+                fc = (FileConnection) Connector.open(url);
+                Enumeration e = fc.list();
+                IOUtils.safelyCloseStream(fc);
+                while (e.hasMoreElements()) {
+                    deleteDir(url + removeEncExtension((String) e.nextElement()));
+                }
+            }
+            fc = (FileConnection) Connector.open(url);
+            if (fc.exists()) {
+                fc.delete();
+            }
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * If user enables SDCard Encryption, then files may get the ".rem" extension.
+     * To get "clean" file url we may use this method. We need a clean url to pass
+     * it to some other IO method.
+     * 
+     * @param url to clean from ".rem" extension.
+     * @return url with ".rem" extension removed if found. Null remains null.
+     */
+    public static String removeEncExtension(String url) {
+        if (url != null && url.endsWith(ENCR_FILE_EXTENSION)) {
+            return url.substring(0, (url.length() - ENCR_FILE_EXTENSION.length()));
+        }
+        return url;
     }
     
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
