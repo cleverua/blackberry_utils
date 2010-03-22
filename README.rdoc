@@ -43,6 +43,7 @@ Provides convenient methods for file IO manipulations:
 * void rename(String url, String newName) throws IOException
 * void copyFile(String sourceFileUrl, String destinationFileUrl) throws IOException
 * void saveDataToFile(String url, byte[] data) throws IOException
+* void saveDataToFile(String url, InputStream is) throws IOException
 * byte[] getFileData(String url) throws IOException
 * void createDir(String url) throws IOException
 * void createDirIncludingAncestors(String url) throws IOException

@@ -324,6 +324,69 @@ public class IOUtils {
     }
     
     /**
+     * Saves data from InputStream to file with a given url.
+     * If the destination file has been already present, then it is overwritten.
+     * 
+     * @param InputStream - to read the data to save from.
+     * @param url - url of the destination file.
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if the target file system is not accessible or the data size is greater 
+     * than free memory that is available on the file system the file resides on.</li>
+     * <li>if an I/O error occurs.</li>
+     * <li>if url has a trailing "/" to denote a directory, or an unspecified error occurs preventing creation of the file.</li>
+     * </ul>
+     */
+    public static void saveDataToFile(String url, InputStream is) throws IOException {
+        FileConnection fc  = null;
+        FileConnection tmp = null;
+        OutputStream out   = null;
+        
+        try {
+            fc = (FileConnection) Connector.open(url);
+            
+            if (fc.exists()) {
+
+                tmp = (FileConnection) Connector.open(url + TMP_EXT);
+                
+                if (tmp.exists()) {
+                    tmp.delete(); /* just in case */
+                }
+                tmp.create();
+                
+                try {
+                    out = tmp.openOutputStream();
+                    copyData(is, out);
+                } catch (IOException e) {
+                    safelyCloseStream(out);
+                    try {
+                        tmp.delete();
+                    } catch (IOException e1) { 
+                        /* do nothing here */
+                    }
+                    throw e;
+                }
+                
+                String originalFileName = fc.getName();
+                fc.delete();
+                tmp.rename(originalFileName);
+                
+            } else {
+                fc.create();
+                out = fc.openOutputStream();
+                copyData(is, out);
+            }
+
+        } finally {
+             safelyCloseStream(out);
+             safelyCloseStream(fc);
+             safelyCloseStream(tmp);
+             safelyCloseStream(is);
+        }
+    }
+    
+    /**
      * Reads file data and returns it as a byte array. 
      * File should be present, otherwise IOException is thrown. 
      * 
