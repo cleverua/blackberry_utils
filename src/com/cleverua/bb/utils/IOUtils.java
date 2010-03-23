@@ -531,6 +531,30 @@ public class IOUtils {
     }
     
     /**
+     * Determines the size of a file on the file system.
+     * 
+     * @param url - URL to a file or be processed
+     * @return The size in bytes of the selected file, 
+     * or -1 if the file does not exist or is not accessible.
+     * @throws IOException
+     * <ul>
+     * <li>if the <code>url</code> is invalid.</li>
+     * <li>if the method is invoked on a directory.</li>
+     * </ul>
+     * @throws SecurityException 
+     * if the security of the application does not have read access for the file.
+     */
+    public static long getFileSize(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);            
+            return fc.fileSize();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
      * If user enables SDCard Encryption, then files may get the ".rem" extension.
      * To get "clean" file url we may use this method. We need a clean url to pass
      * it to some other IO method.

@@ -50,6 +50,7 @@ Provides convenient methods for file IO manipulations:
 * boolean isDirectory(String url) throws IOException
 * void deleteDir(String url) throws IOException
 * String removeEncExtension(String url)
+* long getFileSize(String url) throws IOException
 
 === Logger
 
