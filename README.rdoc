@@ -17,6 +17,8 @@ Provides convenient String manipulation methods:
 * String[] split(String str, String delimiter)
 * String arrayToString(Object[] array)
 * String toHumanReadableString(Object obj)
+* String getStringFromStream(InputStream in) throws IOException
+* String getStringFromStream(InputStream in, String encoding) throws IOException
 
 === MathUtils
 
@@ -51,6 +53,8 @@ Provides convenient methods for file IO manipulations:
 * void deleteDir(String url) throws IOException
 * String removeEncExtension(String url)
 * long getFileSize(String url) throws IOException
+* boolean isPresent(String url) throws IOException
+* boolean isSDCardPresent()
 
 === Logger
 

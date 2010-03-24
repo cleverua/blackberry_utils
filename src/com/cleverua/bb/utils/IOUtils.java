@@ -18,6 +18,8 @@ import net.rim.device.api.system.Characters;
  */
 public class IOUtils {
 
+    public static final String CARD_ROOT = "file:///SDCard/";
+    
     /**
      * Any file gets this ".rem" extension if SDCard Encryption is ON.
      * A media file gets the ".rem" extension if MediaFile Encryption is ON.
@@ -533,7 +535,7 @@ public class IOUtils {
     /**
      * Determines the size of a file on the file system.
      * 
-     * @param url - URL to a file or be processed
+     * @param url - URL to a file to be processed.
      * @return The size in bytes of the selected file, 
      * or -1 if the file does not exist or is not accessible.
      * @throws IOException
@@ -567,6 +569,37 @@ public class IOUtils {
             return url.substring(0, (url.length() - ENCR_FILE_EXTENSION.length()));
         }
         return url;
+    }
+
+    /**
+     * Checks if the file or directory specified in the <code>url</code> 
+     * passed to the method exists.
+     * 
+     * @param url - URL to a file or directory to be processed.
+     * @return true if the target exists and is accessible, otherwise false.
+     * @throws IOException - if the <code>url</code> is invalid.
+     * @throws SecurityException - if the security of the application 
+     * does not have read access for the <code>url</code>.
+     */
+    public static boolean isPresent(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return fc.exists();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * @return true if SDCard is present or false otherwise.
+     */
+    public static boolean isSDCardPresent() {
+        try {
+            return isPresent(CARD_ROOT);
+        } catch (IOException e) {
+            return false;
+        }
     }
     
     private static void copyData(InputStream source, OutputStream destination) throws IOException {

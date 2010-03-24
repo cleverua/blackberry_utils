@@ -1,5 +1,8 @@
 package com.cleverua.bb.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -9,7 +12,16 @@ import net.rim.device.api.util.StringComparator;
 public class StringUtils {
 
     public static StrComparator STRING_COMPARATOR = new StrComparator();
-
+    
+    // supported by BB encodings
+    public static final String ENCODING_ISO_8859_1 = "ISO-8859-1"; // a default one
+    public static final String ENCODING_US_ASCII   = "US-ASCII";
+    public static final String ENCODING_UTF_16BE   = "UTF-16BE";
+    public static final String ENCODING_UTF_16LE   = "UTF-16LE";
+    public static final String ENCODING_UTF_8      = "UTF-8";
+    
+    public static final String DEFAULT_ENCODING = ENCODING_ISO_8859_1;
+    
     private static final String EMPTY = "";
     private static final String EMPTY_ARRAY_REPRESENTATION = "[]";
     private static final String NULL_REPRESENTATION = "null";
@@ -257,6 +269,58 @@ public class StringUtils {
      */
     public static String toHumanReadableString(Object obj) {
         return obj == null ? NULL_REPRESENTATION : '"' + obj.toString()+ '"';
+    }
+    
+    /**
+     * Constructs a String using the data read from the passed InputStream.
+     * Data is read byte by byte.
+     * Each char is created from a single byte using default BlackBerry encoding (ISO-8859-1).
+     * 
+     * @param in - InputStream to read data from.
+     * @return String created using the byte data read from the passed InputStream.
+     * @throws IOException if an I/O error occurs.
+     */
+    public static String getStringFromStream(InputStream in) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        int c;
+        while ((c = in.read()) != -1) {
+            sb.append((char) c);
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Constructs a String using the data read from the passed InputStream.
+     * Data is read char by char. Each char is created using the passed encoding from one or more bytes.
+     * 
+     * <p>If passed encoding is null, then the default BlackBerry encoding (ISO-8859-1) is used.</p>
+     * 
+     * BlackBerry platform supports the following character encodings:
+     * <ul>
+     * <li>"ISO-8859-1"</li>
+     * <li>"UTF-8"</li>
+     * <li>"UTF-16BE"</li>
+     * <li>"UTF-16LE"</li>
+     * <li>"US-ASCII"</li>
+     * </ul>
+     * 
+     * @param in - InputStream to read data from.
+     * @param encoding - String representing the desired character encoding.
+     * @return String created using the char data read from the passed InputStream.
+     * @throws IOException if an I/O error occurs.
+     * @throws UnsupportedEncodingException if encoding is not supported.
+     */
+    public static String getStringFromStream(InputStream in, String encoding) throws IOException {
+        if (encoding == null) {
+            return getStringFromStream(in);
+        }
+        InputStreamReader reader = new InputStreamReader(in, encoding);
+        StringBuffer sb = new StringBuffer();
+        int c;
+        while ((c = reader.read()) != -1) {
+            sb.append((char) c);
+        }
+        return sb.toString();
     }
     
     private static class StrComparator implements Comparator {
