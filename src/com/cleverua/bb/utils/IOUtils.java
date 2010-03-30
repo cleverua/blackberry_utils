@@ -138,13 +138,12 @@ public class IOUtils {
      * @param url - URL to a file or a directory to be deleted, 
      * e.g. <code>"file:///SDCard/file.txt"</code>.
      * 
-     * @throws IOException
-     * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
-     * <li>if the target is a directory and it is not empty, 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
+     * @throws IOException if the target is a directory and it is not empty, 
      * the target is unaccessible, or an unspecified error occurs 
-     * preventing deletion of the target.</li>
-     * </ul>
+     * preventing deletion of the target.
      */
     public static void delete(String url) throws IOException {
         FileConnection fc = null;
@@ -169,16 +168,22 @@ public class IOUtils {
      * The name must not contain any path specification; 
      * the file or directory remains in its same directory as before this method call.
      * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid or 
+     * if <code>newName</code> contains any path specification.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
-     * <li>if the connection's target for the <code>url</code> is not accessible, 
+     * <li> 
+     * if the connection's target for the <code>url</code> is not accessible, 
      * a file or directory already exists by the <code>newName</code>, 
      * or <code>newName</code> is an invalid filename for the platform 
-     * (e.g. contains characters invalid in a filename on the platform)</li>
+     * (e.g. contains characters invalid in a filename on the platform).
+     * </li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
+     * 
      * @throws NullPointerException if <code>newName</code> is null.
-     * @throws IllegalArgumentException if <code>newName</code> contains any path specification.
      */
     public static void rename(String url, String newName) throws IOException {
         FileConnection fc = null;
@@ -197,6 +202,11 @@ public class IOUtils {
      * 
      * @param sourceFileUrl - url of the source file.
      * @param destinationFileUrl - url of the destination file.
+     * 
+     * @throws IllegalArgumentException if the <code>sourceFileUrl</code> or 
+     * <code>destinationFileUrl</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
      */
     public static void copyFile(String sourceFileUrl, String destinationFileUrl) throws IOException {
@@ -262,13 +272,17 @@ public class IOUtils {
      * 
      * @param data - Array of bytes to save.
      * @param url - url of the destination file.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
      * <li>if the target file system is not accessible or the data array size is greater 
      * than free memory that is available on the file system the file resides on.</li>
      * <li>if an I/O error occurs.</li>
      * <li>if url has a trailing "/" to denote a directory, or an unspecified error occurs preventing creation of the file.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static void saveDataToFile(String url, byte[] data) throws IOException {
@@ -331,13 +345,17 @@ public class IOUtils {
      * 
      * @param InputStream - to read the data to save from.
      * @param url - url of the destination file.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
      * <li>if the target file system is not accessible or the data size is greater 
      * than free memory that is available on the file system the file resides on.</li>
      * <li>if an I/O error occurs.</li>
      * <li>if url has a trailing "/" to denote a directory, or an unspecified error occurs preventing creation of the file.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static void saveDataToFile(String url, InputStream is) throws IOException {
@@ -394,11 +412,15 @@ public class IOUtils {
      * 
      * @param url - url of the source file.
      * @return Array of bytes.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * read access for the file.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
      * <li>if an I/O error occurs, if the method is invoked on a directory, 
      * the file does not yet exist, or the connection's target is not accessible.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static byte[] getFileData(String url) throws IOException {
@@ -406,7 +428,7 @@ public class IOUtils {
         InputStream in = null;
         
         try {
-            fc = (FileConnection) Connector.open(url);
+            fc = (FileConnection) Connector.open(url, Connector.READ);
             in = fc.openInputStream();
             byte[] data = new byte[(int) fc.fileSize()];
             in.read(data);
@@ -424,11 +446,15 @@ public class IOUtils {
      * is already exists, then the method does nothing. 
      * 
      * @param url - path to dir to create, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
-     * @throws IOException
-     * <ul> 
-     * <li>if the <code>url</code> is invalid.</li>
-     * <li>if invoked on a non-existent file, the target file system is not accessible, 
-     * or an unspecified error occurs preventing creation of the directory.</li>
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
+     * @throws IOException 
+     * <ul>
+     * <li>if invoked on a non-existent file, the target file system 
+     * is not accessible, or an unspecified error occurs preventing creation of the directory.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static void createDir(String url) throws IOException {
@@ -450,13 +476,15 @@ public class IOUtils {
      * is already exists, then the method does nothing. 
      * 
      * @param url - path to dir to create, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
-     * @throws IllegalArgumentException if <code>url</code> does not 
-     * include <code>":///"</code> substring.
+     * 
+     * @throws IllegalArgumentException <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
-     * <ul> 
-     * <li>if the <code>url</code> is invalid.</li>
-     * <li>if invoked on a non-existent file, the target file system is not accessible, 
-     * or an unspecified error occurs preventing creation of the directory.</li>
+     * <ul>
+     * <li>if invoked on a non-existent file, the target file system is 
+     * not accessible, or an unspecified error occurs preventing creation of the directory.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static void createDirIncludingAncestors(String url) throws IOException {
@@ -479,7 +507,12 @@ public class IOUtils {
     /**
      * @param url - target path to check, e.g. <code>"file:///SDCard/my_new_dir/"</code>.
      * @return True if the target exists, is accessible, and is a directory, otherwise false.
-     * @throws IOException if the <code>url</code> is invalid.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * read access for the connection's target.
+     * 
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
      */
     public static boolean isDirectory(String url) throws IOException {
         FileConnection fc = null;
@@ -505,18 +538,21 @@ public class IOUtils {
      * @param url - URL to a file or a directory to be deleted, 
      * e.g. <code>"file:///SDCard/my_dir/"</code>.
      * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
      * <li>the target is unaccessible, or an unspecified error occurs 
      * preventing deletion of the target.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
      */
     public static void deleteDir(String url) throws IOException {
         FileConnection fc = null;
         try {
             if (isDirectory(url)) {
-                fc = (FileConnection) Connector.open(url);
+                fc = (FileConnection) Connector.open(url, Connector.READ);
                 Enumeration e = fc.list();
                 IOUtils.safelyCloseStream(fc);
                 while (e.hasMoreElements()) {
@@ -538,13 +574,16 @@ public class IOUtils {
      * @param url - URL to a file to be processed.
      * @return The size in bytes of the selected file, 
      * or -1 if the file does not exist or is not accessible.
+     * 
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * read access for the connection's target.
      * @throws IOException
      * <ul>
-     * <li>if the <code>url</code> is invalid.</li>
      * <li>if the method is invoked on a directory.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
      * </ul>
-     * @throws SecurityException 
-     * if the security of the application does not have read access for the file.
      */
     public static long getFileSize(String url) throws IOException {
         FileConnection fc = null;
@@ -577,8 +616,10 @@ public class IOUtils {
      * 
      * @param url - URL to a file or directory to be processed.
      * @return true if the target exists and is accessible, otherwise false.
-     * @throws IOException - if the <code>url</code> is invalid.
-     * @throws SecurityException - if the security of the application 
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application 
      * does not have read access for the <code>url</code>.
      */
     public static boolean isPresent(String url) throws IOException {
