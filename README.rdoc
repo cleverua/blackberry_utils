@@ -55,6 +55,7 @@ Provides convenient methods for file IO manipulations:
 * long getFileSize(String url) throws IOException
 * boolean isPresent(String url) throws IOException
 * boolean isSDCardPresent()
+* long getDirectorySize(String url, boolean includeSubDirs) throws IOException
 
 === Logger
 

@@ -643,6 +643,37 @@ public class IOUtils {
         }
     }
     
+    /**
+     * Determines the size in bytes on a file system of all of the files 
+     * that are contained in a directory.
+     * 
+     * @param url - URL to a directory to be processed.
+     * @param includeSubDirs - if set to true, the method determines the size of the given directory 
+     * and all subdirs recursively. If false, the method returns the size of the files 
+     * in the directory only.
+     * 
+     * @return The size in bytes occupied by the files included in the directory, 
+     * or -1 if the directory does not exist or is not accessible.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws IOException 
+     * <ul>
+     * <li>if the method is invoked on a file.</li>
+     * <li>if the firewall disallows a connection that is not btspp or comm.</li>
+     * </ul>
+     * @throws SecurityException if the security of the application does not have 
+     * read access for the directory.
+     */
+    public static long getDirectorySize(String url, boolean includeSubDirs) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return fc.directorySize(includeSubDirs);
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
         byte[] buf = new byte[1024];
         int len;
