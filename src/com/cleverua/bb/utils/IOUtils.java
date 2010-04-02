@@ -674,6 +674,110 @@ public class IOUtils {
         }
     }
     
+    /**
+     * Determines the free memory that is available on the file system the file or directory resides on.
+     * This may only be an estimate and may vary based on platform-specific file system 
+     * blocking and metadata information.
+     * 
+     * @param url - URL to a file or directory to be processed.
+     * 
+     * @return The available size in bytes on a file system, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the root volume.
+     */
+    public static long getAvailableSize(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return  fc.availableSize();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Some devices may provide localized error messages. So it may be uncomfortable
+     * for the support team to understand a localized error message. 
+     * This method is aimed to help providing error messages in English.
+     * 
+     * @param e - instance of FileIOException to be processed.
+     * @return A human readable English string error message for the FileIOException.
+     */
+    public static String getFileIOExceptionInfo(FileIOException e) {
+        final int errorCode = e.getErrorCode();
+        if (errorCode == FileIOException.CONTENT_BUILT_IN) {
+            return "The operation is not allowed because the content is built-in (preloaded)";
+        } else if (errorCode == FileIOException.DIRECTORY_ALREADY_EXISTS) {
+            return "The directory already exists";
+        } else if (errorCode == FileIOException.DIRECTORY_FULL) {
+            return "The directory is full";
+        } else if (errorCode == FileIOException.DIRECTORY_NOT_EMPTY) {
+            return "The directory is not empty";
+        } else if (errorCode == FileIOException.DIRECTORY_NOT_FOUND) {
+            return "The directory cannot be found";
+        } else if (errorCode == FileIOException.FILE_BUSY) {
+            return "The operation failed because file is currently opened";
+        } else if (errorCode == FileIOException.FILE_HANDLES_OPEN) {
+            return "The file handle used is already open";
+        } else if (errorCode == FileIOException.FILE_NOT_OPEN) {
+            return "The file is no longer open";
+        } else if (errorCode == FileIOException.FILE_SYSTEM_UNAVAILABLE) {
+            return "The file system is unavailable";
+        } else if (errorCode == FileIOException.FILE_TOO_LARGE) {
+            return "File exceeds the maximum file size of the destination";
+        } else if (errorCode == FileIOException.FILENAME_ALREADY_EXISTS) {
+            return "The filename already exists";
+        } else if (errorCode == FileIOException.FILENAME_NOT_FOUND) {
+            return "The filename cannot be found";
+        } else if (errorCode == FileIOException.FILENAME_TOO_LONG) {
+            return "The filename is too long";
+        } else if (errorCode == FileIOException.FILESYSTEM_EMPTY) {
+            return "The file system is empty";
+        } else if (errorCode == FileIOException.FILESYSTEM_FULL) {
+            return "The file system is full";
+        } else if (errorCode == FileIOException.FS_ALREADY_MOUNTED) {
+            return "The file system is already mounted";
+        } else if (errorCode == FileIOException.FS_LOCKED_BY_OTHER_DEVICE) {
+            return "The operation failed because the sdcard is already locked by another device";
+        } else if (errorCode == FileIOException.FS_NOT_MOUNTED) {
+            return "The file system is not mounted";
+        } else if (errorCode == FileIOException.FS_VERIFICATION_FAILED) {
+            return "The file system failed to be mounted because of a verification error";
+        } else if (errorCode == FileIOException.GENERAL_ERROR) {
+            return "A general error occurred";
+        } else if (errorCode == FileIOException.INVALID_CHARACTERS) {
+            return "The string specified contains invalid characters";
+        } else if (errorCode == FileIOException.INVALID_HANDLE) {
+            return "The file system handle used in the file operation is currently invalid";
+        } else if (errorCode == FileIOException.INVALID_OPERATION) {
+            return "The operation requested is invalid";
+        } else if (errorCode == FileIOException.INVALID_PARAMETER) {
+            return "The file system received an invalid parameter";
+        } else if (errorCode == FileIOException.IS_A_DIRECTORY) {
+            return "The filename requested is a directory";
+        } else if (errorCode == FileIOException.MEDIUM_NOT_FORMATTED) {
+            return "The medium is not formatted";
+        } else if (errorCode == FileIOException.NO_FREE_HANDLES) {
+            return "There are no more free handles";
+        } else if (errorCode == FileIOException.NO_SUCH_ROOT) {
+            return "The root specified is not available";
+        } else if (errorCode == FileIOException.NOT_A_DIRECTORY) {
+            return "The filename requested is not a directory";
+        } else if (errorCode == FileIOException.NOT_A_FILE) {
+            return "The filename requested is not a file";
+        } else if (errorCode == FileIOException.OS_BUSY) {
+            return "The operating system is busy";
+        } else if (errorCode == FileIOException.STREAM_ALREADY_OPENED) {
+            return "The requested stream is already opened";
+        } else {
+            return "no additional info";
+        }
+    }
+    
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
         byte[] buf = new byte[1024];
         int len;
