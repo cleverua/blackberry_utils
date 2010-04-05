@@ -689,7 +689,7 @@ public class IOUtils {
      * @throws SecurityException if the security of the application does 
      * not have read access to the root volume.
      */
-    public static long getAvailableSize(String url) throws IOException {
+    public static long getAvailableFileSystemSize(String url) throws IOException {
         FileConnection fc = null;
         try {
             fc = (FileConnection) Connector.open(url, Connector.READ);
@@ -775,6 +775,27 @@ public class IOUtils {
             return "The requested stream is already opened";
         } else {
             return "no additional info";
+        }
+    }
+    
+    /**
+     * Determines the total size of the file system the connection's target resides on.
+     * 
+     * @param url - URL to a file or directory to be processed.
+     * @return The total size of the file system in bytes, or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the root volume.
+     */
+    public static long getTotalFileSystemSize(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return fc.totalSize();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
         }
     }
     
