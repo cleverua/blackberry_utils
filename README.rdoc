@@ -59,6 +59,9 @@ Provides convenient methods for file IO manipulations:
 * long getAvailableFileSystemSize(String url) throws IOException
 * String getFileIOExceptionInfo(FileIOException e)
 * long getTotalFileSystemSize(String url) throws IOException
+* long getUsedFileSystemSize(String url) throws IOException 
+* long getUsedDeviceMemory() throws IOException
+* long getAvailableDeviceMemory() throws IOException
 
 === Logger
 

@@ -18,7 +18,11 @@ import net.rim.device.api.system.Characters;
  */
 public class IOUtils {
 
+    /** String "file:///SDCard/" representing the URL to SD Card root. */
     public static final String CARD_ROOT = "file:///SDCard/";
+    
+    /** String "file:///store/" representing the URL to Device Memory root. */
+    public static final String DEVICE_MEMORY_ROOT = "file:///store/";
     
     /**
      * Any file gets this ".rem" extension if SDCard Encryption is ON.
@@ -797,6 +801,66 @@ public class IOUtils {
         } finally {
             IOUtils.safelyCloseStream(fc);
         }
+    }
+    
+    /**
+     * Determines the used memory of a file system the connection's target resides on. 
+     * This may only be an estimate and may vary based on platform-specific 
+     * file system blocking and metadata information.
+     * 
+     * @param url - URL to a file or directory to be processed.
+     * @return The used size of bytes on a file system the connection's target resides on, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws SecurityException - if the security of the application does not have 
+     * read access to the root volume.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws IllegalArgumentException if the <code>url</code> is invalid.
+     */
+    public static long getUsedFileSystemSize(String url) throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(url, Connector.READ);
+            return fc.usedSize();
+        } finally {
+            IOUtils.safelyCloseStream(fc);
+        }
+    }
+    
+    /**
+     * Determines the used memory of a DeviceMemory's file system. 
+     * This may only be an estimate and may vary based on platform-specific 
+     * file system blocking and metadata information.
+     * 
+     * @return The used size of bytes on a DeviceMemory's file system, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws SecurityException - if the security of the application does not have 
+     * read access to the DeviceMemory root volume.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws IllegalArgumentException if the {@link #DEVICE_MEMORY_ROOT} 
+     * happens to be invalid for the current device.
+     */
+    public static long getUsedDeviceMemory() throws IOException {
+        return getUsedFileSystemSize(DEVICE_MEMORY_ROOT);
+    }
+    
+    /**
+     * Determines the free memory that is available on the DeviceMemory's file system.
+     * This may only be an estimate and may vary based on platform-specific file system 
+     * blocking and metadata information.
+     * 
+     * @return The available size in bytes on the DeviceMemory's file system, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if {@link #DEVICE_MEMORY_ROOT} 
+     * happens to be invalid for the current device.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the DeviceMemory root volume.
+     */
+    public static long getAvailableDeviceMemory() throws IOException {
+        return getAvailableFileSystemSize(DEVICE_MEMORY_ROOT);
     }
     
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
