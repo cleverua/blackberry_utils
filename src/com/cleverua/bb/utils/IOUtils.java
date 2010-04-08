@@ -863,6 +863,74 @@ public class IOUtils {
         return getAvailableFileSystemSize(DEVICE_MEMORY_ROOT);
     }
     
+    /**
+     * Determines the total size of the DeviceMemory's file system.
+     * 
+     * @return The total size of the DeviceMemory's file system in bytes, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if {@link #DEVICE_MEMORY_ROOT} 
+     * happens to be invalid for the current device.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the DeviceMemory root volume.
+     */
+    public static long getTotalDeviceMemory() throws IOException {
+        return getTotalFileSystemSize(DEVICE_MEMORY_ROOT);
+    }
+    
+    /**
+     * Determines the used memory of a SDCard's file system. 
+     * This may only be an estimate and may vary based on platform-specific 
+     * file system blocking and metadata information.
+     * 
+     * @return The used size of bytes on a SDCard's file system, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws SecurityException - if the security of the application does not have 
+     * read access to the SDCard root volume.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws IllegalArgumentException if the {@link #CARD_ROOT} 
+     * happens to be invalid for the current device.
+     */
+    public static long getUsedSDCardSize() throws IOException {
+        return getUsedFileSystemSize(CARD_ROOT);
+    }
+    
+    /**
+     * Determines the free memory that is available on the SDCard's file system.
+     * This may only be an estimate and may vary based on platform-specific file system 
+     * blocking and metadata information.
+     * 
+     * @return The available size in bytes on the SDCard's file system, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if {@link #CARD_ROOT} 
+     * happens to be invalid for the current device.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the SDCard's root volume.
+     */
+    public static long getAvailableSDCardSize() throws IOException {
+        return getAvailableFileSystemSize(CARD_ROOT);
+    }
+    
+    /**
+     * Determines the total size of the SDCard's file system.
+     * 
+     * @return The total size of the SDCard's file system in bytes, 
+     * or -1 if the file system is not accessible.
+     * 
+     * @throws IllegalArgumentException if {@link #CARD_ROOT} 
+     * happens to be invalid for the current device.
+     * @throws IOException if the firewall disallows a connection that is not btspp or comm.
+     * @throws SecurityException if the security of the application does 
+     * not have read access to the SDCard's root volume.
+     */
+    public static long getTotalSDCardSize() throws IOException {
+        return getTotalFileSystemSize(CARD_ROOT);
+    }
+    
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
         byte[] buf = new byte[1024];
         int len;

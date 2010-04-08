@@ -62,6 +62,10 @@ Provides convenient methods for file IO manipulations:
 * long getUsedFileSystemSize(String url) throws IOException 
 * long getUsedDeviceMemory() throws IOException
 * long getAvailableDeviceMemory() throws IOException
+* long getTotalDeviceMemory() throws IOException
+* long getUsedSDCardSize() throws IOException
+* long getAvailableSDCardSize() throws IOException
+* long getTotalSDCardSize() throws IOException
 
 === Logger
 
