@@ -54,7 +54,8 @@ Provides convenient methods for file IO manipulations:
 * String removeEncExtension(String url)
 * long getFileSize(String url) throws IOException
 * boolean isPresent(String url) throws IOException
-* boolean isSDCardPresent()
+* boolean isSDCardAccessible()
+* boolean isDeviceMemoryAccessible()
 * long getDirectorySize(String url, boolean includeSubDirs) throws IOException
 * long getAvailableFileSystemSize(String url) throws IOException
 * String getFileIOExceptionInfo(FileIOException e)

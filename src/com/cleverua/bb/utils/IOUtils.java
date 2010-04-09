@@ -637,11 +637,32 @@ public class IOUtils {
     }
     
     /**
-     * @return true if SDCard is present or false otherwise.
+     * @return true if SDCard exists and is accessible or false otherwise.
+     * 
+     * @throws SecurityException if the security of the application 
+     * does not have read access for the {@link #CARD_ROOT} url.
+     * @throws IllegalArgumentException if the {@link #CARD_ROOT} url 
+     * happens to be invalid for the current device.
      */
-    public static boolean isSDCardPresent() {
+    public static boolean isSDCardAccessible() {
         try {
             return isPresent(CARD_ROOT);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * @return true if Device Memory exists and is accessible or false otherwise.
+     * 
+     * @throws SecurityException if the security of the application 
+     * does not have read access for the {@link #DEVICE_MEMORY_ROOT} url.
+     * @throws IllegalArgumentException if the {@link #DEVICE_MEMORY_ROOT} url 
+     * happens to be invalid for the current device.
+     */
+    public static boolean isDeviceMemoryAccessible() {
+        try {
+            return isPresent(DEVICE_MEMORY_ROOT);
         } catch (IOException e) {
             return false;
         }
