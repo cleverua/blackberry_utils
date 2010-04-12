@@ -67,6 +67,9 @@ Provides convenient methods for file IO manipulations:
 * long getUsedSDCardSize() throws IOException
 * long getAvailableSDCardSize() throws IOException
 * long getTotalSDCardSize() throws IOException
+* boolean isFileSystemFullException(Throwable e)
+* boolean isSDCardEncryptionEnabled() throws IOException
+
 
 === Logger
 

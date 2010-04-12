@@ -33,6 +33,9 @@ public class IOUtils {
     private static final String TMP_EXT = ".tmp";
     private static final String URL_ROOT_SEPARATOR = ":///";
     
+    /** Currently it is "file:///SDCard/encription_test.txt". */
+    private static final String TEST_CARD_ENCRYPTION_FILE = CARD_ROOT + "encription_test.txt";
+    
     /**
      * Safely closes {@link InputStream} stream.
      * 
@@ -950,6 +953,51 @@ public class IOUtils {
      */
     public static long getTotalSDCardSize() throws IOException {
         return getTotalFileSystemSize(CARD_ROOT);
+    }
+    
+    /**
+     * @param e - {@link Throwable} to process.
+     * @return True if <code>e</code> is an instance of {@link FileIOException} and 
+     * its error code is {@link FileIOException#FILESYSTEM_FULL}, otherwise - false. 
+     */
+    public static boolean isFileSystemFullException(Throwable e) {
+        return (e instanceof FileIOException) && 
+            (((FileIOException)e).getErrorCode() == FileIOException.FILESYSTEM_FULL);
+    }
+    
+    /**
+     * This method creates a file for {@link #TEST_CARD_ENCRYPTION_FILE} url 
+     * (if already exists - deletes its first) and then checks for the got file extension.
+     * It was observed that if SDCard Encryption is ON, then newly created files get ".rem" extension.
+     * The method relies on this OS behavior to detect the SDCard Encryption state.
+     * 
+     * @return True if SDCard Encryption is ON, otherwise false.
+     *  
+     * @throws IllegalArgumentException if the {@link #TEST_CARD_ENCRYPTION_FILE} url is invalid.
+     * @throws SecurityException if the security of the application does not have 
+     * both read and write access for the connection's target.
+     * @throws IOException if the target the target is unaccessible, or an unspecified error occurs 
+     * preventing deletion of the target, or if the firewall disallows a connection that is 
+     * not btspp or comm.
+     */
+    public static boolean isSDCardEncryptionEnabled() throws IOException {
+        FileConnection fc = null;
+        try {
+            fc = (FileConnection) Connector.open(TEST_CARD_ENCRYPTION_FILE);
+            if (fc.exists()) { 
+                fc.delete(); 
+            }
+            fc.create();
+            return fc.getName().endsWith(ENCR_FILE_EXTENSION);
+        } finally {
+            try {
+                if (fc != null && fc.exists()) { fc.delete(); }
+            } catch (Exception e) {
+                Logger.debug("Failed to cleanup after IOUtils.isSDCardEncryptionEnabled(): " + e);
+            } finally {
+                safelyCloseStream(fc);
+            }
+        }
     }
     
     private static void copyData(InputStream source, OutputStream destination) throws IOException {
