@@ -70,6 +70,12 @@ Provides convenient methods for file IO manipulations:
 * boolean isFileSystemFullException(Throwable e)
 * boolean isSDCardEncryptionEnabled() throws IOException
 
+=== ImageUtils
+
+Provides convenient methods for image manipulations:
+
+* EncodedImage resize(EncodedImage eImage, int toWidth, int toHeight, boolean keepAspectRatio)
+* EncodedImage getResizedImage(String imgUrl, int toWidth, int toHeight) throws IOException
 
 === Logger
 
