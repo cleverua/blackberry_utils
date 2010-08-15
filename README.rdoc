@@ -85,7 +85,7 @@ A simple file logging facility.
 
 See details on Logger usage here: http://github.com/cleverua/blackberry_logger
 
-== SoftwareVersionUtils
+=== SoftwareVersionUtils
 
 Provides OsVersion class that has convenient methods for OS (Sotfware) Version manipulations:
 
