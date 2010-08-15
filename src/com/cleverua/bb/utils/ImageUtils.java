@@ -73,6 +73,9 @@ public class ImageUtils {
         
             // Logger.debug("getResizedImage: byte[] data size = " + data.length + ", going to read..");
             in.read(data);
+            
+            IOUtils.safelyCloseStream(in);
+            IOUtils.safelyCloseStream(fc);
 
             // Logger.debug("getResizedImage: going to create EncodedImage..");
             EncodedImage eImage = EncodedImage.createEncodedImage(data, 0, data.length);
