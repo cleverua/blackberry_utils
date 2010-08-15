@@ -85,6 +85,21 @@ A simple file logging facility.
 
 See details on Logger usage here: http://github.com/cleverua/blackberry_logger
 
+== SoftwareVersionUtils
+
+Provides OsVersion class that has convenient methods for OS (Sotfware) Version manipulations:
+
+* isEqualTo(OsVersion other)
+* isGreaterThan(OsVersion other)
+* isGreaterThanOrEquals(OsVersion other)
+* isLessThan(OsVersion other)
+* isLessThanOrEquals(OsVersion other)
+* isEqualTo(OsVersion other, int precision)
+* isGreaterThan(OsVersion other, int precision)
+* isGreaterThanOrEquals(OsVersion other, int precision)
+* isLessThan(OsVersion other, int precision)
+* isLessThanOrEquals(OsVersion other, int precision)
+
 == EXAMPLES
 
 Examples are not present.
