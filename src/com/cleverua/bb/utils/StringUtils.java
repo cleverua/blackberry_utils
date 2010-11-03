@@ -273,25 +273,21 @@ public class StringUtils {
     
     /**
      * Constructs a String using the data read from the passed InputStream.
-     * Data is read byte by byte.
-     * Each char is created from a single byte using default BlackBerry encoding (ISO-8859-1).
+     * Data is read using a 1024-chars buffer.
+     * Each char is created using the default BlackBerry encoding (ISO-8859-1).
      * 
      * @param in - InputStream to read data from.
      * @return String created using the byte data read from the passed InputStream.
      * @throws IOException if an I/O error occurs.
      */
     public static String getStringFromStream(InputStream in) throws IOException {
-        StringBuffer sb = new StringBuffer();
-        int c;
-        while ((c = in.read()) != -1) {
-            sb.append((char) c);
-        }
-        return sb.toString();
+        return getStringFromStream(in, null);
     }
     
     /**
      * Constructs a String using the data read from the passed InputStream.
-     * Data is read char by char. Each char is created using the passed encoding from one or more bytes.
+     * Data is read using a 1024-chars buffer. Each char is created using the passed 
+     * encoding from one or more bytes.
      * 
      * <p>If passed encoding is null, then the default BlackBerry encoding (ISO-8859-1) is used.</p>
      * 
@@ -305,21 +301,27 @@ public class StringUtils {
      * </ul>
      * 
      * @param in - InputStream to read data from.
-     * @param encoding - String representing the desired character encoding.
+     * @param encoding - String representing the desired character encoding, can be null.
      * @return String created using the char data read from the passed InputStream.
      * @throws IOException if an I/O error occurs.
      * @throws UnsupportedEncodingException if encoding is not supported.
      */
     public static String getStringFromStream(InputStream in, String encoding) throws IOException {
+        InputStreamReader reader;
         if (encoding == null) {
-            return getStringFromStream(in);
+            reader = new InputStreamReader(in);
+        } else {
+            reader = new InputStreamReader(in, encoding);            
         }
-        InputStreamReader reader = new InputStreamReader(in, encoding);
+        
         StringBuffer sb = new StringBuffer();
-        int c;
-        while ((c = reader.read()) != -1) {
-            sb.append((char) c);
+        
+        final char[] buf = new char[1024];
+        int len;
+        while ((len = reader.read(buf)) > 0) {
+            sb.append(buf, 0, len);
         }
+        
         return sb.toString();
     }
     
