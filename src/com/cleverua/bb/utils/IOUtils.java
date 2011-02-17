@@ -36,6 +36,8 @@ public class IOUtils {
     /** Currently it is "file:///SDCard/encription_test.txt". */
     private static final String TEST_CARD_ENCRYPTION_FILE = CARD_ROOT + "encription_test.txt";
     
+    private static final Object TORCH_COPY_FILE_HACK_SYNC_LOCK = new Object();
+    
     /**
      * Safely closes {@link InputStream} stream.
      * 
@@ -262,6 +264,105 @@ public class IOUtils {
                 is = source.openInputStream();
                 os = destination.openOutputStream();
                 copyData(is, os);
+            }
+            
+        } finally {
+             safelyCloseStream(is);
+             safelyCloseStream(os);
+             safelyCloseStream(source);
+             safelyCloseStream(destination);
+             safelyCloseStream(destinationTmp);
+        }
+    }
+
+    /**
+     * Copies a file. If the destination file has been already present, then it
+     * is overwritten.
+     * 
+     * <p>This is basically the same method as original
+     * {@link #IOUtils.copyFile(String sourceFileUrl, String destinationFileUrl)
+     * IOUtils.copyFile(String sourceFileUrl, String destinationFileUrl)},
+     * except it provides a workaround for a <a
+     * href="https://www.blackberry.com/jira/browse/JAVAAPI-1513">known RIM
+     * bug</a>.
+     * </p>
+     * 
+     * <p>
+     * The bug shows itself as the copied file content being corrupted, despite
+     * the file size is correct.
+     * </p>
+     * 
+     * <p><b>WARNING</b>: Using this method is potentially dangerous - it may result in
+     * {@link OutOfMemoryError} if source file is larger than max RAM the OS
+     * grants to the app. While the original method uses a small buffer to
+     * read/write data, this method uses a buffer whose size equals to source
+     * file size (this is actually the workaround). So it is important to use
+     * this only with affected OS 6 devices and switch to original method as
+     * soon as RIM fixes the bug.</p>
+     * 
+     * @param sourceFileUrl
+     *            - url of the source file.
+     * @param destinationFileUrl
+     *            - url of the destination file.
+     * 
+     * @throws IllegalArgumentException
+     *             if the <code>sourceFileUrl</code> or
+     *             <code>destinationFileUrl</code> is invalid.
+     * @throws SecurityException
+     *             if the security of the application does not have both read
+     *             and write access for the connection's target.
+     * @throws IOException
+     */
+    public static void copyFileForTorchHack(String sourceFileUrl, String destinationFileUrl) throws IOException {
+        InputStream is  = null;
+        OutputStream os = null;
+        FileConnection source         = null;
+        FileConnection destination    = null;
+        FileConnection destinationTmp = null;
+        
+        try {
+            
+            source = (FileConnection) Connector.open(sourceFileUrl, Connector.READ);
+            destination = (FileConnection) Connector.open(destinationFileUrl);
+            
+            // fileSize() returns the size in bytes of the selected file, 
+            // or -1 if the file does not exist or is not accessible.
+            final long sourceSize = source.fileSize();
+            
+            if (destination.exists()) {
+                // truncate does not work if file is encrypted via SDCard encryption (has ".rem" suffix)!
+                // destination.truncate(0);
+                
+                destinationTmp = (FileConnection) Connector.open(destinationFileUrl + TMP_EXT);
+                
+                if (destinationTmp.exists()) {
+                    destinationTmp.delete(); /* just in case */
+                }
+                destinationTmp.create();
+                
+                try {
+                    is = source.openInputStream();
+                    os = destinationTmp.openOutputStream();
+                    copyDataForTorchHack(is, os, sourceSize);
+                } catch (IOException e) {
+                    safelyCloseStream(os);
+                    try {
+                        destinationTmp.delete();
+                    } catch (IOException e1) { 
+                        /* do nothing here */
+                    }
+                    throw e;
+                }
+                
+                String destinationFileName = destination.getName();
+                destination.delete();
+                destinationTmp.rename(destinationFileName);
+                
+            } else {
+                destination.create();
+                is = source.openInputStream();
+                os = destination.openOutputStream();
+                copyDataForTorchHack(is, os, sourceSize);
             }
             
         } finally {
@@ -1007,5 +1108,40 @@ public class IOUtils {
             destination.write(buf, 0, len);
         }
         destination.flush();
+    }
+
+    /**
+     * This is a hack for Torch 9800 (and I believe for the rest of new OS 6.0
+     * devices, however the rest were not tested) bug.
+     * <p>
+     * The bug shows itself as the copied file content being corrupted, despite
+     * the file size is correct.
+     * </p>
+     * <p>
+     * Official RIM issue tracker has a <a href="https://www.blackberry.com/jira/browse/JAVAAPI-1513">ticket</a> 
+     * for this. Here is the RIM dev forum 
+     * <a href="http://supportforums.blackberry.com/t5/Java-Development/reading-and-writing-file-on-Torch-9800/td-p/611516/highlight/false">
+     * thread</a> on this.
+     * </p>
+     */
+    private static void copyDataForTorchHack(InputStream is, OutputStream os, long bufSize) throws IOException {
+        if (bufSize > (long)Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("invalid bufSize " + bufSize 
+                    + ", max allowed is " + Integer.MAX_VALUE);
+        } else if (bufSize == -1) {
+            throw new IllegalArgumentException("invalid bufSize " + bufSize);
+        }
+        
+        // Since we potentially may copy large files on several threads at the same time,
+        // let's make sure we use RAM carefully by allowing only one buffer at a time.
+        
+        synchronized (TORCH_COPY_FILE_HACK_SYNC_LOCK) {
+            byte[] buf = new byte[(int)bufSize];
+            int len;
+            while ((len = is.read(buf)) > 0) {
+                os.write(buf, 0, len);
+            }
+            os.flush();
+        }
     }
 }
