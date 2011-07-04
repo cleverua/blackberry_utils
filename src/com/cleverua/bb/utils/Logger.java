@@ -39,15 +39,21 @@ public class Logger {
 
     public synchronized static void debug(String msg) {
 
+        final String message = getMessage(msg);
+
         // always write log file if on simulator 
         if (DeviceInfo.isSimulator()) {
-            writeToFile(getMessage(msg));
+            writeToFile(message);
+            SysLog.log(message);
             return;
         }
 
         // if on real device do logging only if logger is enabled globally (LOG_ENABLED)
         if (LOG_ENABLED) {
-            writeToFile(getMessage(msg));
+            writeToFile(message);
+
+            // Write the log message to the device EventLogger.
+            SysLog.log(message);
         }
     }
 
