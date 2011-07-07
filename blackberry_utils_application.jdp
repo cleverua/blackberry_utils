@@ -30,6 +30,7 @@ src\com\cleverua\bb\utils\IOUtils.java
 src\com\cleverua\bb\utils\Logger.java
 src\com\cleverua\bb\utils\MathUtils.java
 src\com\cleverua\bb\utils\StringUtils.java
+src\com\cleverua\bb\utils\SysLog.java
 ]
 HaveAlxImports=0
 HaveDefs=0
